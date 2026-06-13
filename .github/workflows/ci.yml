@@ -1,9 +1,79 @@
+# name: Basic CI
+
+# on:
+#   push:
+#     branches:
+#       # - develop
+#       - main
+
+#   pull_request:
+
+# jobs:
+#   ci:
+
+#     runs-on: ubuntu-latest
+
+#     steps:
+
+#       - name: Checkout Repository
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 22
+        
+#       - name: Login To DockerHub
+#         uses: docker/login-action@v3
+#         with:
+#           username: ${{ secrets.DOCKERHUB_USERNAME }}
+#           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+#       - name: Install Backend Dependencies
+#         working-directory: backend
+#         run: |
+#             npm ci
+#             docker build \
+#             -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:${{ github.sha }} \
+#             .
+
+#       - name: Install Frontend Dependencies
+#         working-directory: frontend
+#         run: npm install
+
+#       # - name: Run Backend Tests test
+#       #   working-directory: backend
+#       #   run: npm test
+
+#       # - name: Run Frontend Tests
+#       #   working-directory: frontend
+#       #   run: npm test -- --watchAll=false
+
+#       # - name: Build Backend
+#       #   working-directory: backend
+#       #   run: npm run build
+
+#       - name: Build Frontend & Frontend Image
+#         working-directory: frontend
+#         run: |
+#           npm run build
+#           docker build \
+#           -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:${{ github.sha }} \
+#           .
+
+
+#       - name: Push Docker Image
+#         run: |
+#           docker push \
+#           ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:${{ github.sha }}
+#           docker push \
+#           ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:${{ github.sha }}
+
 name: Basic CI
 
 on:
   push:
     branches:
-      # - develop
       - main
 
   pull_request:
@@ -15,56 +85,118 @@ jobs:
 
     steps:
 
+      # -------------------------
+      # Checkout
+      # -------------------------
+
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      # -------------------------
+      # Node Setup
+      # -------------------------
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-        
+
+      # -------------------------
+      # DockerHub Login
+      # -------------------------
+
       - name: Login To DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # -------------------------
+      # Install Dependencies
+      # -------------------------
+
       - name: Install Backend Dependencies
         working-directory: backend
-        run: |
-            npm ci
-            docker build \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:${{ github.sha }} \
-            .
+        run: npm ci
 
       - name: Install Frontend Dependencies
         working-directory: frontend
         run: npm install
 
-      # - name: Run Backend Tests test
+      # -------------------------
+      # Linting
+      # -------------------------
+
+      # - name: Lint Backend
       #   working-directory: backend
-      #   run: npm test
+      #   run: npm run lint
+
+      # - name: Lint Frontend
+      #   working-directory: frontend
+      #   run: npm run lint
+
+      # # -------------------------
+      # # Unit Tests
+      # # -------------------------
+
+      # - name: Run Backend Tests
+      #   working-directory: backend
+      #   run: npm test -- --ci
 
       # - name: Run Frontend Tests
       #   working-directory: frontend
       #   run: npm test -- --watchAll=false
 
+      # -------------------------
+      # Build Validation
+      # -------------------------
+
       # - name: Build Backend
       #   working-directory: backend
       #   run: npm run build
 
-      - name: Build Frontend & Frontend Image
+      - name: Build Frontend
         working-directory: frontend
+        run: npm run build
+
+      # -------------------------
+      # Docker Build Backend
+      # -------------------------
+
+      - name: Build Backend Image
+        working-directory: backend
         run: |
-          npm run build
           docker build \
-          -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:${{ github.sha }} \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:${{ github.sha }} \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:latest \
           .
 
+      # -------------------------
+      # Docker Build Frontend
+      # -------------------------
 
-      - name: Push Docker Image
+      - name: Build Frontend Image
+        working-directory: frontend
         run: |
-          docker push \
-          ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:${{ github.sha }}
-          docker push \
-          ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:${{ github.sha }}
+          docker build \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:${{ github.sha }} \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:latest \
+          .
+
+      # -------------------------
+      # Push Backend Image
+      # -------------------------
+
+      - name: Push Backend Image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:latest
+
+      # -------------------------
+      # Push Frontend Image
+      # -------------------------
+
+      - name: Push Frontend Image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:latest
