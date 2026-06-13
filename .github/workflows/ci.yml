@@ -41,7 +41,7 @@ jobs:
         working-directory: frontend
         run: npm install
 
-      # - name: Run Backend Tests
+      # - name: Run Backend Tests test
       #   working-directory: backend
       #   run: npm test
 
