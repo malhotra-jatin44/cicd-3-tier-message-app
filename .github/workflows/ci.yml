@@ -22,10 +22,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+        
+      - name: Login To DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Install Backend Dependencies
         working-directory: backend
-        run: npm ci
+        run: |
+            npm ci
+            docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:${{ github.sha }} \
+            .
 
       - name: Install Frontend Dependencies
         working-directory: frontend
@@ -43,23 +53,18 @@ jobs:
       #   working-directory: backend
       #   run: npm run build
 
-      - name: Build Frontend
+      - name: Build Frontend & Frontend Image
         working-directory: frontend
-        run: npm run build
-
-      - name: Login To DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build Docker Image
         run: |
+          npm run build
           docker build \
-          -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app:${{ github.sha }} \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:${{ github.sha }} \
           .
+
 
       - name: Push Docker Image
         run: |
           docker push \
-          ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app:${{ github.sha }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:${{ github.sha }}
+          docker push \
+          ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:${{ github.sha }}
