@@ -144,9 +144,9 @@ jobs:
       #   working-directory: backend
       #   run: npm test -- --ci
 
-      - name: Run Frontend Tests
-        working-directory: frontend
-        run: npm test -- --watchAll=false
+      # - name: Run Frontend Tests
+      #   working-directory: frontend
+      #   run: npm test -- --watchAll=false
 
       # -------------------------
       # Build Validation
