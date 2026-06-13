@@ -1,0 +1,92 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+
+metadata:
+  name: developer-binding
+  namespace: messaging-app
+
+subjects:
+- kind: ServiceAccount
+  name: developer-user
+  namespace: messaging-app
+
+roleRef:
+  kind: Role
+  name: developer-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+
+metadata:
+  name: auditor-binding
+  namespace: messaging-app
+
+subjects:
+- kind: ServiceAccount
+  name: auditor-user
+  namespace: messaging-app
+
+roleRef:
+  kind: Role
+  name: auditor-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+
+metadata:
+  name: cluster-role-binding
+  namespace: messaging-app
+
+subjects:
+- kind: ServiceAccount
+  name: cluster-aud-user
+  namespace: messaging-app
+
+roleRef:
+  kind: ClusterRole
+  name: cluster-auditor
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+
+metadata:
+  name: backend-secret-reader-binding
+  namespace: messaging-app
+
+subjects:
+- kind: ServiceAccount
+  name: backend-sa
+  namespace: messaging-app
+
+roleRef:
+  kind: Role
+  name: backend-secret-reader
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+
+metadata:
+  name: devops-readonly-binding
+
+subjects:
+
+- kind: ServiceAccount
+  name: devops-user
+  namespace: messaging-app
+
+roleRef:
+  kind: ClusterRole
+  name: cluster-readonly
+  apiGroup: rbac.authorization.k8s.io

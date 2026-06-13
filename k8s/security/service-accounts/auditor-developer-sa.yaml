@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ServiceAccount
+
+metadata:
+  name: developer-user
+  namespace: messaging-app
+
+---
+apiVersion: v1
+
+kind: ServiceAccount
+metadata:
+  name: auditor-user
+  namespace: messaging-app

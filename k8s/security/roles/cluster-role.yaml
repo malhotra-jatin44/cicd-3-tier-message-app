@@ -1,0 +1,51 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+
+metadata:
+  name: cluster-auditor
+
+rules:
+
+- apiGroups: [""]
+
+  resources:
+    - pods
+
+  verbs:
+    - get
+    - list
+    - watch
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+
+metadata:
+  name: cluster-readonly
+
+rules:
+
+- apiGroups: [""]
+  resources:
+    - pods
+    - services
+    - namespaces
+    - nodes
+    - events
+
+  verbs:
+    - get
+    - list
+    - watch
+
+- apiGroups: ["apps"]
+
+  resources:
+    - deployments
+    - replicasets
+
+  verbs:
+    - get
+    - list
+    - watch
