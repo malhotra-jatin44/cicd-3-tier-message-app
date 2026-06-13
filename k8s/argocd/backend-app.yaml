@@ -7,6 +7,17 @@ metadata:
   name: backend
   namespace: argocd
 
+  annotations:
+
+    argocd-image-updater.argoproj.io/image-list: backend=jatin44/obs-backend
+
+    argocd-image-updater.argoproj.io/backend.helm.image-name: image.repository
+
+    argocd-image-updater.argoproj.io/backend.helm.image-tag: image.tag
+
+    argocd-image-updater.argoproj.io/backend.update-strategy: newest-build
+
+    argocd-image-updater.argoproj.io/write-back-method: git
 spec:
   project: default
 
