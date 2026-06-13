@@ -39,9 +39,9 @@ jobs:
       #   working-directory: frontend
       #   run: npm test -- --watchAll=false
 
-      - name: Build Backend
-        working-directory: backend
-        run: npm run build
+      # - name: Build Backend
+      #   working-directory: backend
+      #   run: npm run build
 
       - name: Build Frontend
         working-directory: frontend
