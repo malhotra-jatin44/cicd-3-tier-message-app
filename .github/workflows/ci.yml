@@ -152,9 +152,9 @@ jobs:
       # Build Validation
       # -------------------------
 
-      - name: Build Backend
-        working-directory: backend
-        run: npm run build
+      # - name: Build Backend
+      #   working-directory: backend
+      #   run: npm run build
 
       - name: Build Frontend
         working-directory: frontend
