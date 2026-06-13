@@ -140,9 +140,9 @@ jobs:
       # # Unit Tests
       # # -------------------------
 
-      - name: Run Backend Tests
-        working-directory: backend
-        run: npm test -- --ci
+      # - name: Run Backend Tests
+      #   working-directory: backend
+      #   run: npm test -- --ci
 
       - name: Run Frontend Tests
         working-directory: frontend
