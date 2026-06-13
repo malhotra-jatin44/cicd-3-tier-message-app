@@ -15,9 +15,15 @@ metadata:
 
     argocd-image-updater.argoproj.io/frontend.helm.image-tag: image.tag
 
-    argocd-image-updater.argoproj.io/frontend.update-strategy: newest-build
+    argocd-image-updater.argoproj.io/frontend.update-strategy: latest
 
     argocd-image-updater.argoproj.io/write-back-method: git
+
+    argocd-image-updater.argoproj.io/git-branch: main
+
+    argocd-image-updater.argoproj.io/write-back-target: helmvalues
+
+    argocd-image-updater.argoproj.io/frontend.allow-tags: regexp:^main-[a-f0-9]+$
 
 spec:
   project: default
