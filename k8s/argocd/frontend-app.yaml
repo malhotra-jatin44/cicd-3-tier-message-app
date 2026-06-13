@@ -1,0 +1,25 @@
+# frontend-app.yaml
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: frontend
+  namespace: argocd
+
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/malhotra-jatin44/cicd-3-tier-message-app.git
+    targetRevision: main
+    path: k8s/frontend-chart
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: messaging-app
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
