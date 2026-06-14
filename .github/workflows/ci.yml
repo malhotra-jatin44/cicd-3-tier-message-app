@@ -207,6 +207,8 @@ jobs:
       - backend-ci
       - frontend-ci
       - gitleaks
+      - trivy-frontend
+      - trivy-frontend
 
     if: github.event_name == 'push'
 
