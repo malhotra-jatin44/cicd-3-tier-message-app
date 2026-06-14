@@ -118,6 +118,28 @@ jobs:
 
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  
+  # ==========================================================
+# Gitleaks Secret Scanning
+# ==========================================================
+
+  gitleaks:
+
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]')
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ==========================================================
   # GitOps Updates
@@ -128,6 +150,7 @@ jobs:
     needs:
       - backend-ci
       - frontend-ci
+      - gitleaks
 
     if: github.event_name == 'push'
 
