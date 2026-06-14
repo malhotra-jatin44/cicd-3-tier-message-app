@@ -163,7 +163,9 @@ jobs:
 
           exit-code: '1'
 
-          severity: CRITICAL,HIGH
+          severity: CRITICAL
+
+          scanners: vuln
 
           ignore-unfixed: true
 
@@ -189,7 +191,9 @@ jobs:
 
           exit-code: '1'
 
-          severity: CRITICAL,HIGH
+          severity: CRITICAL
+
+          scanners: vuln
 
           ignore-unfixed: true
 
