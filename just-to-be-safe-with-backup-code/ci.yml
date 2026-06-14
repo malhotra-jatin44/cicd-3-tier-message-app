@@ -1,0 +1,171 @@
+name: Basic CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+      # -------------------------
+      # Checkout
+      # -------------------------
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -------------------------
+      # Node Setups
+      # -------------------------
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # -------------------------
+      # DockerHub Login
+      # -------------------------
+
+      - name: Login To DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # -------------------------
+      # Install Dependencies
+      # -------------------------
+
+      - name: Install Backend Dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      # -------------------------
+      # Linting
+      # -------------------------
+
+      - name: Lint Backend
+        working-directory: backend
+        run: npm run lint
+
+      - name: Lint Frontend
+        working-directory: frontend
+        run: npm run lint
+
+      # -------------------------
+      # Tests (enable later)
+      # -------------------------
+
+      # - name: Run Backend Tests
+      #   working-directory: backend
+      #   run: npm test -- --ci
+
+      # - name: Run Frontend Tests
+      #   working-directory: frontend
+      #   run: npm test -- --watchAll=false
+
+      # -------------------------
+      # Build Validation
+      # -------------------------
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
+
+      # -------------------------
+      # Docker Build Backend
+      # -------------------------
+
+      - name: Build Backend Image
+        working-directory: backend
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:${{ github.sha }} \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:latest \
+            .
+
+      # -------------------------
+      # Docker Build Frontend
+      # -------------------------
+
+      - name: Build Frontend Image
+        working-directory: frontend
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:${{ github.sha }} \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:latest \
+            .
+
+      # -------------------------
+      # Push Backend Image
+      # -------------------------
+
+      - name: Push Backend Image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-backend:latest
+
+      # -------------------------
+      # Push Frontend Image
+      # -------------------------
+
+      - name: Push Frontend Image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/messaging-app-frontend:latest
+
+      # -------------------------
+      # Update Helm Image Tags
+      # Only on push to mains
+      # -------------------------
+
+      - name: Update Helm Values
+        if: github.event_name == 'push'
+        run: |
+
+          sed -i 's|tag:.*|tag: "${{ github.sha }}"|' k8s/frontend-chart/values.yaml
+
+          sed -i 's|tag:.*|tag: "${{ github.sha }}"|' k8s/backend-chart/values.yaml
+
+      # -------------------------
+      # Commit Updated Helm Values
+      # -------------------------
+
+      - name: Commit and Push Updated Tags
+        if: github.event_name == 'push'
+        run: |
+
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add k8s/frontend-chart/values.yaml
+          git add k8s/backend-chart/values.yaml
+
+          git commit -m "ci: update image tags to ${{ github.sha }} [skip ci]" || exit 0
+
+          git push
